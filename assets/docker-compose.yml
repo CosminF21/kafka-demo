@@ -1,0 +1,39 @@
+version: '3'
+services:
+  zookeeper-cos:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - test
+
+  kafka-cosmin-test:
+    image: 'bitnami/kafka:latest'
+    container_name: kafka-cosmin-test
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-cos:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-cosmin-test:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      ALLOW_PLAINTEXT_LISTENER: yes
+    networks:
+      - test
+
+  app:
+    build: D:\02_On boarding, Trainings, Docs\Java test projects\Kafka demo app\kafka-demo
+    container_name: app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka-cosmin-test:9092
+    depends_on:
+      - kafka-cosmin-test
+    networks:
+      - test
+
+networks:
+  test:
+    driver: bridge
